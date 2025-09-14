@@ -21,25 +21,12 @@ load_dotenv()
 #     # 환경 변수에 키 파일 경로를 설정합니다.
 #     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
 
+
 # except Exception as e:
 #     st.error(f"환경 변수 로드 오류: {e}")
 #     st.stop()
-
-import streamlit as st
-import json
-import re
-from google.cloud import language_v1
-
-try:
-    credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-    credentials_json = credentials_raw.strip()
-    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
-    credentials_json = credentials_json.replace("\\n", "\n")
-    credentials_dict = json.loads(credentials_json)
-
-    # private_key를 올바른 형식으로 재구성
-    private_key = credentials_dict["private_key"]
-
+def format_private_key(private_key):
+    """private_key를 올바른 형식으로 변환"""
     # BEGIN과 END 사이의 키 데이터만 추출
     key_data = (
         private_key.replace("-----BEGIN PRIVATE KEY-----", "")
@@ -53,27 +40,41 @@ try:
         formatted_lines.append(key_data[i : i + 64])
 
     # 올바른 형식으로 재조립
-    formatted_private_key = (
+    return (
         "-----BEGIN PRIVATE KEY-----\n"
         + "\n".join(formatted_lines)
         + "\n-----END PRIVATE KEY-----\n"
     )
 
-    # credentials_dict 업데이트
-    credentials_dict["private_key"] = formatted_private_key
 
-    # 결과 확인 (처음 몇 줄만)
-    st.write("재포맷된 private_key 첫 부분:")
-    st.code(formatted_private_key[:200] + "...")
+try:
+    # secrets에서 credentials 가져오기
+    credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
+    credentials_json = credentials_raw.strip()
+    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
+    credentials_json = credentials_json.replace("\\n", "\n")
+    credentials_dict = json.loads(credentials_json)
 
-    # 클라이언트 초기화
+    # private_key 재포맷
+    credentials_dict["private_key"] = format_private_key(
+        credentials_dict["private_key"]
+    )
+
+    # 클라이언트 초기화 (한 번만!)
     client = language_v1.LanguageServiceClient.from_service_account_info(
         credentials_dict
     )
+
     st.success("Google Cloud API 클라이언트 초기화 성공!")
+
+    # 여기서 client를 사용해서 실제 작업 수행
+    # 예: 감정 분석
+    # document = language_v1.Document(content="Hello world", type_=language_v1.Document.Type.PLAIN_TEXT)
+    # response = client.analyze_sentiment(request={"document": document})
 
 except Exception as e:
     st.error(f"오류: {e}")
+    st.stop()
 
 
 # 구글 자연어 API 클라이언트 초기화
