@@ -509,9 +509,9 @@ else:
                         st.text_area(
                             "",
                             (
-                                processed_text[:500] + "..."
-                                if len(processed_text) > 500
-                                else processed_text
+                                st.session_state.processed_text[:500] + "..."
+                                if len(st.session_state.processed_text) > 500
+                                else st.session_state.processed_text
                             ),
                             height=100,
                         )
