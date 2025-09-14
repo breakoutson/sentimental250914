@@ -520,9 +520,9 @@ else:
 if st.button("🔍 감성 분석 시작"):
     # 디버깅 정보
     st.write(
-        f"DEBUG - processed_text 길이: {len(st.session_state.processed_text) if st.session_state.processed_text else 0}"
+        f"DEBUG - 글의 길이: {len(st.session_state.processed_text) if st.session_state.processed_text else 0}"
     )
-    st.write(f"DEBUG - processed_text 타입: {type(st.session_state.processed_text)}")
+    # st.write(f"DEBUG - 글 타입: {type(st.session_state.processed_text)}")
 
     if not st.session_state.processed_text:
         st.warning("분석할 텍스트를 입력하거나 블로그 URL에서 내용을 가져와주세요.")
@@ -609,8 +609,9 @@ with st.sidebar:
     
     ### 📈 점수 해석
     - **감성 점수**: -1(부정) ~ +1(긍정)
-    - **감정 강도**: 0(무감정) ~ 4+(강한 감정)
-    
+    - **감정 강도**: 0(무감정) ~ 4+(매우강함)
+    - 부정적 표현을 가능한 줄이는것이 상위노출에 도움(전자책 참고)
+
     ### ✨ 특징
     - 이모지 자동 제거
     - 불필요한 텍스트 정리
