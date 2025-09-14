@@ -25,34 +25,52 @@ load_dotenv()
 #     st.error(f"환경 변수 로드 오류: {e}")
 #     st.stop()
 
+import streamlit as st
+import json
+import re
+from google.cloud import language_v1
+
 try:
-    # 기존 코드...
     credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
     credentials_json = credentials_raw.strip()
     credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
     credentials_json = credentials_json.replace("\\n", "\n")
     credentials_dict = json.loads(credentials_json)
 
-    # private_key 상세 분석
+    # private_key를 올바른 형식으로 재구성
     private_key = credentials_dict["private_key"]
-    st.write("private_key 첫 100자:", repr(private_key[:100]))
-    st.write("private_key 마지막 100자:", repr(private_key[-100:]))
 
-    # 개행 문자 확인
-    st.write("실제 개행 문자(\\n) 개수:", private_key.count("\n"))
-    st.write("백슬래시n(\\\\n) 개수:", private_key.count("\\n"))
+    # BEGIN과 END 사이의 키 데이터만 추출
+    key_data = (
+        private_key.replace("-----BEGIN PRIVATE KEY-----", "")
+        .replace("-----END PRIVATE KEY-----", "")
+        .strip()
+    )
 
-    # private_key 줄 분석
-    lines = private_key.split("\n")
-    st.write("총 줄 수:", len(lines))
-    st.write("첫 번째 줄:", repr(lines[0]))
-    st.write("마지막 줄:", repr(lines[-1]))
+    # 64자씩 끊어서 개행 문자 추가
+    formatted_lines = []
+    for i in range(0, len(key_data), 64):
+        formatted_lines.append(key_data[i : i + 64])
 
-    # Google Cloud 클라이언트 시도
+    # 올바른 형식으로 재조립
+    formatted_private_key = (
+        "-----BEGIN PRIVATE KEY-----\n"
+        + "\n".join(formatted_lines)
+        + "\n-----END PRIVATE KEY-----\n"
+    )
+
+    # credentials_dict 업데이트
+    credentials_dict["private_key"] = formatted_private_key
+
+    # 결과 확인 (처음 몇 줄만)
+    st.write("재포맷된 private_key 첫 부분:")
+    st.code(formatted_private_key[:200] + "...")
+
+    # 클라이언트 초기화
     client = language_v1.LanguageServiceClient.from_service_account_info(
         credentials_dict
     )
-    st.success("성공!")
+    st.success("Google Cloud API 클라이언트 초기화 성공!")
 
 except Exception as e:
     st.error(f"오류: {e}")
