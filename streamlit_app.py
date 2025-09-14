@@ -25,58 +25,38 @@ load_dotenv()
 #     st.error(f"환경 변수 로드 오류: {e}")
 #     st.stop()
 
-
 try:
-    # Use st.secrets to access the content of the JSON key file
+    # 기존 코드...
     credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
     credentials_json = credentials_raw.strip()
-    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)  # 실제 개행문자 제거
-    credentials_json = credentials_json.replace(
-        "\\n", "\n"
-    )  # JSON 내 \n은 실제 개행으로
-
-    # 디버깅: JSON 파싱 전 확인
-    st.write("처리된 JSON 길이:", len(credentials_json))
-    st.write("JSON 시작 부분:", credentials_json[:100])
-
+    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
+    credentials_json = credentials_json.replace("\\n", "\n")
     credentials_dict = json.loads(credentials_json)
 
-    # 디버깅: 필수 필드 확인
-    required_fields = [
-        "type",
-        "project_id",
-        "private_key_id",
-        "private_key",
-        "client_email",
-    ]
-    missing_fields = [
-        field for field in required_fields if field not in credentials_dict
-    ]
+    # private_key 상세 분석
+    private_key = credentials_dict["private_key"]
+    st.write("private_key 첫 100자:", repr(private_key[:100]))
+    st.write("private_key 마지막 100자:", repr(private_key[-100:]))
 
-    if missing_fields:
-        st.error(f"누락된 필드들: {missing_fields}")
-        st.write("실제 JSON 키들:", list(credentials_dict.keys()))
-    else:
-        st.success("모든 필수 필드 존재")
+    # 개행 문자 확인
+    st.write("실제 개행 문자(\\n) 개수:", private_key.count("\n"))
+    st.write("백슬래시n(\\\\n) 개수:", private_key.count("\\n"))
 
-        # private_key 내용 확인
-        private_key = credentials_dict.get("private_key", "")
-        st.write("private_key 길이:", len(private_key))
-        st.write("BEGIN PRIVATE KEY 포함?", "BEGIN PRIVATE KEY" in private_key)
-        st.write("END PRIVATE KEY 포함?", "END PRIVATE KEY" in private_key)
+    # private_key 줄 분석
+    lines = private_key.split("\n")
+    st.write("총 줄 수:", len(lines))
+    st.write("첫 번째 줄:", repr(lines[0]))
+    st.write("마지막 줄:", repr(lines[-1]))
 
-    # Initialize the client with the credentials
+    # Google Cloud 클라이언트 시도
     client = language_v1.LanguageServiceClient.from_service_account_info(
         credentials_dict
     )
-    st.success("Google Cloud API 클라이언트 초기화 성공!")
+    st.success("성공!")
 
-except json.JSONDecodeError as e:
-    st.error(f"JSON 파싱 오류: {e}")
-    st.write("문제 위치:", e.pos if hasattr(e, "pos") else "Unknown")
 except Exception as e:
-    st.error(f"Google Cloud API 클라이언트 초기화 오류: {e}")
-    st.stop()
+    st.error(f"오류: {e}")
+
 
 # 구글 자연어 API 클라이언트 초기화
 try:
