@@ -77,12 +77,12 @@ except Exception as e:
     st.stop()
 
 
-# 구글 자연어 API 클라이언트 초기화
-try:
-    client = language_v1.LanguageServiceClient()
-except Exception as e:
-    st.error(f"Google Cloud API 클라이언트 초기화 오류: {e}")
-    st.stop()
+# # 구글 자연어 API 클라이언트 초기화
+# try:
+#     client = language_v1.LanguageServiceClient()
+# except Exception as e:
+#     st.error(f"Google Cloud API 클라이언트 초기화 오류: {e}")
+#     st.stop()
 
 
 def analyze_sentiment(text_content):
