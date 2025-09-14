@@ -520,9 +520,9 @@ else:
 if st.button("🔍 감성 분석 시작"):
     # 디버깅 정보
     st.write(
-        f"DEBUG - processed_text 길이: {len(processed_text) if processed_text else 0}"
+        f"DEBUG - processed_text 길이: {len(st.session_state.processed_text) if st.session_state.processed_text else 0}"
     )
-    st.write(f"DEBUG - processed_text 타입: {type(processed_text)}")
+    st.write(f"DEBUG - processed_text 타입: {type(st.session_state.processed_text)}")
 
     if not st.session_state.processed_text:
         st.warning("분석할 텍스트를 입력하거나 블로그 URL에서 내용을 가져와주세요.")
@@ -530,7 +530,9 @@ if st.button("🔍 감성 분석 시작"):
         with st.spinner("분석 중..."):
             # 텍스트 전처리 (직접 입력인 경우에도 적용)
             if input_type == "직접 입력":
-                processed_text = preprocess_text(processed_text)
+                st.session_state.processed_text = preprocess_text(
+                    st.session_state.processed_text
+                )
 
             # 프로그레스 바 애니메이션
             progress_bar = st.progress(0)
@@ -564,7 +566,9 @@ if st.button("🔍 감성 분석 시작"):
 
                 with col3:
                     # 텍스트 길이 표시
-                    st.metric("텍스트 길이", f"{len(processed_text)} 자")
+                    st.metric(
+                        "텍스트 길이", f"{len(st.session_state.processed_text)} 자"
+                    )
 
                 st.markdown("---")
 
@@ -593,7 +597,7 @@ if st.button("🔍 감성 분석 시작"):
 
                 # 분석된 텍스트 표시 (접을 수 있게)
                 with st.expander("분석된 텍스트 보기"):
-                    st.text_area("", processed_text, height=200)
+                    st.text_area("", st.session_state.processed_text, height=200)
 
 # 사이드바에 도움말 추가
 with st.sidebar:
