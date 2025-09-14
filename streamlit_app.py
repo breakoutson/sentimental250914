@@ -501,7 +501,7 @@ else:
             with st.spinner("블로그 내용을 가져오는 중..."):
                 crawled_text = crawl_naver_blog(url_input)
                 if crawled_text:
-                    processed_text = preprocess_text(crawled_text)
+                    st.session_state.processed_text = preprocess_text(crawled_text)
                     st.success("블로그 내용을 성공적으로 가져왔습니다!")
 
                     # 가져온 텍스트 미리보기
@@ -524,7 +524,7 @@ if st.button("🔍 감성 분석 시작"):
     )
     st.write(f"DEBUG - processed_text 타입: {type(processed_text)}")
 
-    if not processed_text:
+    if not st.session_state.processed_text:
         st.warning("분석할 텍스트를 입력하거나 블로그 URL에서 내용을 가져와주세요.")
     else:
         with st.spinner("분석 중..."):
@@ -539,7 +539,7 @@ if st.button("🔍 감성 분석 시작"):
                 progress_bar.progress(i + 1)
 
             # 구글 API로 감성 분석
-            score, magnitude = analyze_sentiment(processed_text)
+            score, magnitude = analyze_sentiment(st.session_state.processed_text)
 
             if score is not None and magnitude is not None:
                 st.markdown("---")
