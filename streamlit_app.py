@@ -3,6 +3,7 @@ from google.cloud import language_v1
 import os
 from dotenv import load_dotenv
 import json
+import re
 
 # .env 파일에서 환경 변수를 로드합니다.
 # .env 파일이 루트 폴더에 있으므로 경로를 따로 지정하지 않습니다.
@@ -28,7 +29,11 @@ load_dotenv()
 try:
     # Use st.secrets to access the content of the JSON key file
     credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-    credentials_json = credentials_raw.replace("\\n", "\n")
+    credentials_json = credentials_raw.strip()
+    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)  # 실제 개행문자 제거
+    credentials_json = credentials_json.replace(
+        "\\n", "\n"
+    )  # JSON 내 \n은 실제 개행으로
     credentials_dict = json.loads(credentials_json)
     # Initialize the client with the credentials
     client = language_v1.LanguageServiceClient.from_service_account_info(
