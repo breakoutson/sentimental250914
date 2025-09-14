@@ -27,8 +27,9 @@ load_dotenv()
 
 try:
     # Use st.secrets to access the content of the JSON key file
-    credentials_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS"])
-
+    credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
+    credentials_json = credentials_raw.replace("\\n", "\n")
+    credentials_dict = json.loads(credentials_json)
     # Initialize the client with the credentials
     client = language_v1.LanguageServiceClient.from_service_account_info(
         credentials_dict
