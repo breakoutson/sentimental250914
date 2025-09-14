@@ -1,3 +1,4 @@
 streamlit
 google-cloud-language
 python-dotenv
+json

@@ -2,6 +2,7 @@ import streamlit as st
 from google.cloud import language_v1
 import os
 from dotenv import load_dotenv
+import json
 
 # .env 파일에서 환경 변수를 로드합니다.
 # .env 파일이 루트 폴더에 있으므로 경로를 따로 지정하지 않습니다.
@@ -26,7 +27,7 @@ load_dotenv()
 
 try:
     # Use st.secrets to access the content of the JSON key file
-    credentials_dict = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
+    credentials_dict = json.loads(st.secrets["GOOGLE_APPLICATION_CREDENTIALS"])
 
     # Initialize the client with the credentials
     client = language_v1.LanguageServiceClient.from_service_account_info(
