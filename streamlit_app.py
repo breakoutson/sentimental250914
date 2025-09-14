@@ -9,79 +9,74 @@ import re
 # .env 파일이 루트 폴더에 있으므로 경로를 따로 지정하지 않습니다.
 load_dotenv()
 
-# Google Cloud 서비스 계정 키 파일 경로를 환경 변수에서 가져옵니다.
-# 이 경로는 .env 파일에 정의되어 있습니다.
-# try:
-#     key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-#     if key_path is None:
-#         raise ValueError(
-#             "환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'를 찾을 수 없습니다."
-#         )
-
-#     # 환경 변수에 키 파일 경로를 설정합니다.
-#     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
-
-
-# except Exception as e:
-#     st.error(f"환경 변수 로드 오류: {e}")
-#     st.stop()
-def format_private_key(private_key):
-    """private_key를 올바른 형식으로 변환"""
-    # BEGIN과 END 사이의 키 데이터만 추출
-    key_data = (
-        private_key.replace("-----BEGIN PRIVATE KEY-----", "")
-        .replace("-----END PRIVATE KEY-----", "")
-        .strip()
-    )
-
-    # 64자씩 끊어서 개행 문자 추가
-    formatted_lines = []
-    for i in range(0, len(key_data), 64):
-        formatted_lines.append(key_data[i : i + 64])
-
-    # 올바른 형식으로 재조립
-    return (
-        "-----BEGIN PRIVATE KEY-----\n"
-        + "\n".join(formatted_lines)
-        + "\n-----END PRIVATE KEY-----\n"
-    )
-
-
 try:
-    # secrets에서 credentials 가져오기
+    # JSON 파싱
     credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
-    credentials_json = credentials_raw.strip()
-    credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
-    credentials_json = credentials_json.replace("\\n", "\n")
+    credentials_json = re.sub(r"[\r\n\t]", "", credentials_raw.strip()).replace(
+        "\\n", "\n"
+    )
     credentials_dict = json.loads(credentials_json)
 
-    # private_key 재포맷
-    credentials_dict["private_key"] = format_private_key(
-        credentials_dict["private_key"]
-    )
-
-    # 클라이언트 초기화 (한 번만!)
+    # 클라이언트 초기화
     client = language_v1.LanguageServiceClient.from_service_account_info(
         credentials_dict
     )
-
-    st.success("Google Cloud API 클라이언트 초기화 성공!")
-
-    # 여기서 client를 사용해서 실제 작업 수행
-    # 예: 감정 분석
-    # document = language_v1.Document(content="Hello world", type_=language_v1.Document.Type.PLAIN_TEXT)
-    # response = client.analyze_sentiment(request={"document": document})
+    st.success("Google Cloud API 연결 성공!")
 
 except Exception as e:
-    st.error(f"오류: {e}")
+    st.error(f"API 연결 오류: {e}")
     st.stop()
 
 
-# # 구글 자연어 API 클라이언트 초기화
+# def format_private_key(private_key):
+#     """private_key를 올바른 형식으로 변환"""
+#     # BEGIN과 END 사이의 키 데이터만 추출
+#     key_data = (
+#         private_key.replace("-----BEGIN PRIVATE KEY-----", "")
+#         .replace("-----END PRIVATE KEY-----", "")
+#         .strip()
+#     )
+
+#     # 64자씩 끊어서 개행 문자 추가
+#     formatted_lines = []
+#     for i in range(0, len(key_data), 64):
+#         formatted_lines.append(key_data[i : i + 64])
+
+#     # 올바른 형식으로 재조립
+#     return (
+#         "-----BEGIN PRIVATE KEY-----\n"
+#         + "\n".join(formatted_lines)
+#         + "\n-----END PRIVATE KEY-----\n"
+#     )
+
+
 # try:
-#     client = language_v1.LanguageServiceClient()
+#     # secrets에서 credentials 가져오기
+#     credentials_raw = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
+#     credentials_json = credentials_raw.strip()
+#     credentials_json = re.sub(r"[\r\n\t]", "", credentials_json)
+#     credentials_json = credentials_json.replace("\\n", "\n")
+#     credentials_dict = json.loads(credentials_json)
+
+#     # private_key 재포맷
+#     credentials_dict["private_key"] = format_private_key(
+#         credentials_dict["private_key"]
+#     )
+
+#     # 클라이언트 초기화 (한 번만!)
+#     client = language_v1.LanguageServiceClient.from_service_account_info(
+#         credentials_dict
+#     )
+
+#     st.success("Google Cloud API 클라이언트 초기화 성공!")
+
+#     # 여기서 client를 사용해서 실제 작업 수행
+#     # 예: 감정 분석
+#     # document = language_v1.Document(content="Hello world", type_=language_v1.Document.Type.PLAIN_TEXT)
+#     # response = client.analyze_sentiment(request={"document": document})
+
 # except Exception as e:
-#     st.error(f"Google Cloud API 클라이언트 초기화 오류: {e}")
+#     st.error(f"오류: {e}")
 #     st.stop()
 
 
