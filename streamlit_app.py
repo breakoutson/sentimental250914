@@ -9,19 +9,33 @@ load_dotenv()
 
 # Google Cloud 서비스 계정 키 파일 경로를 환경 변수에서 가져옵니다.
 # 이 경로는 .env 파일에 정의되어 있습니다.
+# try:
+#     key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+#     if key_path is None:
+#         raise ValueError(
+#             "환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'를 찾을 수 없습니다."
+#         )
+
+#     # 환경 변수에 키 파일 경로를 설정합니다.
+#     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+
+# except Exception as e:
+#     st.error(f"환경 변수 로드 오류: {e}")
+#     st.stop()
+
+
 try:
-    key_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    if key_path is None:
-        raise ValueError(
-            "환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'를 찾을 수 없습니다."
-        )
+    # Use st.secrets to access the content of the JSON key file
+    credentials_dict = st.secrets["GOOGLE_APPLICATION_CREDENTIALS"]
 
-    # 환경 변수에 키 파일 경로를 설정합니다.
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
-
+    # Initialize the client with the credentials
+    client = language_v1.LanguageServiceClient.from_service_account_info(
+        credentials_dict
+    )
 except Exception as e:
-    st.error(f"환경 변수 로드 오류: {e}")
+    st.error(f"Google Cloud API 클라이언트 초기화 오류: {e}")
     st.stop()
+
 
 # 구글 자연어 API 클라이언트 초기화
 try:
